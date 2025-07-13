@@ -1,25 +1,27 @@
 import express from "express";
 import cors from "cors";
 import authRoutes from "./routes/auth.routes.js";
-import productRoutes from "./routes/product.routes.js";  // 👈 Step 8: Import here
+import productRoutes from "./routes/product.routes.js";  
 import cartRoutes from "./routes/cart.routes.js";
 import orderRoutes from "./routes/order.routes.js";
-
+import uploadRoutes from "./routes/upload.routes.js";
 
 
 
 const app = express();
-app.use("/api/cart", cartRoutes);
-app.use("/api/orders", orderRoutes);
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/auth", authRoutes);       // For register/login
-app.use("/api/products", productRoutes); // 👈 Mount product routes here
-
-app.get("/", (req, res) => {
-  res.send("E-Commerce API is running 🚀");
+// Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/upload", uploadRoutes); 
+app.use("/api/cart", cartRoutes);
+app.use("/api/orders", orderRoutes);
+app.get("/", (_req, res) => {
+  res.send("E-Commerce API is running ");
 });
 
 export { app };
