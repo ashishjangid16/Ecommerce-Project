@@ -3,18 +3,34 @@ import { Product } from "../models/product.model.js";
 // Create product (admin only)
 export const createProduct = async (req, res) => {
   try {
+    console.log("Received product data:", req.body);
+    console.log("Received file:", req.file);
+
     const { title, description, price, category, stock } = req.body;
     const imageUrl = req.file?.path;
 
+    if (!title || !price || !category) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
     const product = await Product.create({
-      title, description, price, category, stock, imageUrl
+      title,
+      description,
+      price,
+      category,
+      stock,
+      imageUrl,
     });
+
+    console.log("Product saved:", product);
 
     res.status(201).json({ message: "Product created", product });
   } catch (err) {
+    console.error("Product creation failed:", err);
     res.status(500).json({ message: "Product creation failed", error: err.message });
   }
 };
+
 
 // Get all products
 export const getProducts = async (req, res) => {

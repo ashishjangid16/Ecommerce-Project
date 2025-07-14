@@ -16,6 +16,7 @@ const router = express.Router();
 // Public
 router.get("/", getProducts);
 router.get("/:id", getProduct);
+router.post("/create", createProduct);
 
 // Temporary remove auth middlewares for testing
 router.post("/", upload.single("image"), createProduct);
