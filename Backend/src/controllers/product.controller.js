@@ -1,34 +1,50 @@
 import { Product } from "../models/product.model.js";
+import { v2 as cloudinary } from "cloudinary";
 
-// Create product (admin only)
+
 export const createProduct = async (req, res) => {
   try {
-    console.log("Received product data:", req.body);
-    console.log("Received file:", req.file);
+    console.log("📦 req.body:", req.body);
+    console.log("🖼️ req.file:", req.file);
+
+
+    if (!req.file) {
+      return res.status(400).json({ message: "Product image is required" });
+    }
+
+    // ✅ Upload to Cloudinary
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "Ecommerce",
+    });
+    console.log("✅ Cloudinary upload result:", result);
 
     const { title, description, price, category, stock } = req.body;
-    const imageUrl = req.file?.path;
 
     if (!title || !price || !category) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
+    // ✅ Save image URL from Cloudinary
     const product = await Product.create({
       title,
       description,
       price,
       category,
       stock,
-      imageUrl,
+      imageUrl: result.secure_url, // ← NOT req.file.path
     });
 
-    console.log("Product saved:", product);
+    console.log("✅ Product saved:", product);
 
     res.status(201).json({ message: "Product created", product });
   } catch (err) {
-    console.error("Product creation failed:", err);
-    res.status(500).json({ message: "Product creation failed", error: err.message });
-  }
+  console.error("Product creation failed:", err);
+  res.status(500).json({ 
+    message: "Product creation failed", 
+    error: err.message || err.toString(),  //✅ log actual error
+  });
+}
+
 };
 
 
