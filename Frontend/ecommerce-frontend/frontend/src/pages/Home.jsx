@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useCart } from "../context/CartContext"; 
 
 function Home() {
   const [products, setProducts] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true); // optional loader
+  const { addToCart } = useCart(); 
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -12,7 +14,8 @@ function Home() {
         const res = await axios.get("http://localhost:8000/api/products");
 
         // Fallback in case `res.data.products` is undefined
-        const fetchedProducts = res.data?.products || [];
+        const fetchedProducts = Array.isArray(res.data) ? res.data : [];
+
 
         setProducts(fetchedProducts);
         setError("");
@@ -40,8 +43,8 @@ function Home() {
           <div key={product._id} className="col-md-4 mb-4">
             <div className="card h-100 shadow-sm">
               <img
-                src={product.image}
-                className="card-img-top"
+                src={product.image|| "https://res.cloudinary.com/dipl3qujh/image/upload/v1752610773/Ecommerc…"}
+                className="h-48 w-full object-cover"
                 alt={product.title}
               />
               <div className="card-body">
@@ -50,7 +53,8 @@ function Home() {
                   {product.description?.slice(0, 60)}...
                 </p>
                 <p className="fw-bold text-success">₹{product.price}</p>
-                <button className="btn btn-primary w-100">Add to Cart</button>
+                <button  onClick={() => addToCart(product)} 
+                  className="btn btn-primary w-100">Add to Cart</button>
               </div>
             </div>
           </div>
