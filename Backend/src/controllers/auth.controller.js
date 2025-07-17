@@ -1,6 +1,8 @@
 import jwt from "jsonwebtoken";
 import { User } from "../models/user.model.js";
 
+const JWT_SECRET = process.env.JWT_SECRET
+
 const generateToken = (user) => {
   return jwt.sign(
     { id: user._id, email: user.email, role: user.role },
@@ -9,46 +11,67 @@ const generateToken = (user) => {
   );
 };
 
+
 // Register
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    const userExists = await User.findOne({ email });
-    if (userExists) return res.status(400).json({ message: "Email already exists" });
+    if (!name || !email || !password)
+      return res.status(400).json({ message: "All fields are required" });
 
-    const user = await User.create({ name, email, password });
-    const token = generateToken(user);
+    const existingUser = await User.findOne({ email });
+    if (existingUser)
+      return res.status(400).json({ message: "Email already registered" });
 
-    res.status(201).json({
-      message: "User registered successfully",
-      user: { id: user._id, name: user.name, email: user.email, role: user.role },
-      token,
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
     });
+
+    res.status(201).json({ message: "User registered successfully", user });
   } catch (err) {
-    res.status(500).json({ message: "Registration failed", error: err.message });
+    console.error("Register error:", err); 
+    res.status(500).json({ message: "Server error during registration" });
   }
 };
 
-// Login
+//login;
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User not found" });
+    // 1. Validate input
+    if (!email || !password) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
 
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) return res.status(401).json({ message: "Invalid credentials" });
+    // 2. Find user
+    const user = await User.findOne({ email }).select("+password");
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
 
-    const token = generateToken(user);
+    // 3. Match password
+    const isMatch = await user.comparePassword(password); // Assuming comparePassword is a method in your user model
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
 
+    // 4. Generate token
+    const token = user.generateJWT(); // Assuming generateJWT() returns signed token
+
+    // 5. Send response
     res.status(200).json({
-      message: "Login successful",
-      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+      success: true,
+      message: 'Login successful',
       token,
     });
-  } catch (err) {
-    res.status(500).json({ message: "Login failed", error: err.message });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };

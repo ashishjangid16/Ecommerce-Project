@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -24,6 +26,17 @@ const userSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
+userSchema.methods.generateJWT = function () {
+  return jwt.sign(
+    { _id: this._id, email: this.email },
+    process.env.JWT_SECRET,
+    { expiresIn: "7d" }
+  );
+};
+
+userSchema.path('password').select('+password'); // OR add select: false in schema
+
+
 // Hash password before saving
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
@@ -32,8 +45,8 @@ userSchema.pre("save", async function (next) {
 });
 
 // Compare password method
-userSchema.methods.comparePassword = function (enteredPassword) {
-  return bcrypt.compare(enteredPassword, this.password);
+userSchema.methods.comparePassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
 };
 
 export const User = mongoose.model("User", userSchema);
