@@ -9,6 +9,7 @@ router.use(protect);
 router.post("/", placeOrder);
 router.get("/my", getMyOrders);
 router.post("/create", createOrder)
+router.post("/", protect, createOrder); 
 
 
 export default router;

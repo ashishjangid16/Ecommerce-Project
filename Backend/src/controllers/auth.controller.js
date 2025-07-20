@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { User } from "../models/user.model.js";
+import bcrypt from "bcrypt";
 
 const JWT_SECRET = process.env.JWT_SECRET
 
@@ -48,7 +49,6 @@ export const loginUser = async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({ message: 'All fields are required' });
     }
-
     // 2. Find user
     const user = await User.findOne({ email }).select("+password");
     if (!user) {
@@ -56,14 +56,14 @@ export const loginUser = async (req, res) => {
     }
 
     // 3. Match password
-    const isMatch = await user.comparePassword(password); // Assuming comparePassword is a method in your user model
+    
+    const isMatch = bcrypt.compare(password,user.password); // Assuming comparePassword is a method in your user model
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
     // 4. Generate token
-    const token = user.generateJWT(); // Assuming generateJWT() returns signed token
-
+    const token = generateToken(user); // Assuming generateJWT() returns signed token
     // 5. Send response
     res.status(200).json({
       success: true,

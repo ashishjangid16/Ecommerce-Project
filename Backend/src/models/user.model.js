@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema({
 userSchema.methods.generateJWT = function () {
   return jwt.sign(
     { _id: this._id, email: this.email },
-    process.env.JWT_SECRET,
+    process.env.ashish_jwt_secret_2025,
     { expiresIn: "7d" }
   );
 };
@@ -50,3 +50,4 @@ userSchema.methods.comparePassword = async function (enteredPassword) {
 };
 
 export const User = mongoose.model("User", userSchema);
+
