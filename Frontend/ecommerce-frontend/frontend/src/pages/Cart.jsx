@@ -38,9 +38,10 @@ function Cart() {
       setOrderSuccess(true);
       clearCart();
     } catch (err) {
-      console.error("Order failed:", err);
-      alert("Something went wrong while placing the order!");
-    } finally {
+  console.error("Order failed:", err.response?.data || err.message);
+  alert("Something went wrong while placing the order!");
+}
+finally {
       setLoading(false);
     }
   };

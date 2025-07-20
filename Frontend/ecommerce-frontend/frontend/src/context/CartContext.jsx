@@ -1,4 +1,5 @@
 // src/context/CartContext.js
+import axios from "axios";
 import { createContext, useContext, useState, useEffect } from "react";
 
 const CartContext = createContext();
@@ -16,7 +17,7 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
   }, [cartItems]);
 
-  const addToCart = (product) => {
+  const addToCart = async (product) => {
     setCartItems((prev) => {
       const exists = prev.find((item) => item._id === product._id);
       return exists
@@ -27,6 +28,19 @@ export const CartProvider = ({ children }) => {
           )
         : [...prev, { ...product, quantity: 1 }];
     });
+    // try{
+    //   const token = localStorage.getItem("token")
+    //   const res = await axios.post("http://localhost:8000/api/cart/add",cartItems,{
+    //       headers: {
+    //         Authorization: `Bearer ${token}`, // ✅ send token here
+    //         "Content-Type": "application/json",
+    //       },
+    //     });
+    // }
+    // catch(error)
+    // {
+    //   console.log(error);
+    // }
   };
 
   const increaseQty = (id) => {

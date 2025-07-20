@@ -28,8 +28,9 @@ function Home() {
         setLoading(false);
       }
     };
-
     fetchProducts();
+    const token = localStorage.getItem("token");
+    console.log(token);
   }, []);
 
   return (
@@ -40,6 +41,9 @@ function Home() {
       <div className="text-end mb-4">
         <Link to="/cart" className="btn btn-outline-secondary">
           View Cart 🛒
+        </Link>
+        <Link to="/login" className="btn btn-outline-secondary">
+          login
         </Link>
       </div>
 
@@ -54,7 +58,7 @@ function Home() {
             <div className="card h-100 shadow-sm">
               <img
                 src={
-                  product.image ||
+                  product.imageUrl ||
                   "https://res.cloudinary.com/dipl3qujh/image/upload/v1752663541/Ecommerce/sye8hf3szdgx8rezpy29.png"
                 }
                 className="card-img-top"
